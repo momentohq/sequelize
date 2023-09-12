@@ -10,6 +10,7 @@ import type { CreationAttributes, Model, ModelStatic, NormalizedAttributeOptions
 import type { QueryRawOptions, Sequelize } from '../../sequelize.js';
 import { isString } from '../../utils/check';
 import { isModelStatic } from '../../utils/model-utils';
+import type { TableNameOrModel } from '../abstract/query-generator-typescript';
 import { AbstractQueryInterfaceInternal } from '../abstract/query-interface-internal.js';
 import type {
   CreateTableAttributes,
@@ -17,14 +18,14 @@ import type {
   QiOptionsWithReplacements,
   QiSelectOptions,
   QueryInterfaceCreateTableOptions,
-  TableName, TableNameWithSchema,
+  TableName,
+  TableNameWithSchema,
 } from '../abstract/query-interface.js';
 import { AbstractQueryInterface } from '../abstract/query-interface.js';
+import type { QiDropAllTablesOptions, QiDropTableOptions, QiShowAllTablesOptions } from '../abstract/query-interface.types';
+import type { WhereOptions } from '../abstract/where-sql-builder-types';
 import type { MomentoConnection } from './connection-manager';
 import type { MomentoQueryGenerator } from './query-generator.js';
-import { TableNameOrModel } from '../abstract/query-generator-typescript';
-import { WhereOptions } from '../abstract/where-sql-builder-types';
-import {QiDropAllTablesOptions, QiDropTableOptions, QiShowAllTablesOptions} from "../abstract/query-interface.types";
 
 export class MomentoQueryInterfaceTypescript extends AbstractQueryInterface {
   #internalQueryInterface: AbstractQueryInterfaceInternal;
@@ -42,13 +43,15 @@ export class MomentoQueryInterfaceTypescript extends AbstractQueryInterface {
 
   /**
    * Inserts a 'row' into Momento. A row in Momento maps to a dictionary item in the cache, where the primary key of the
-   * row is the dictionary name. All columns including the PK is stored in the dictionary as fields. Primary key attribute
+   * row is the dictionary name. All columns including the PK is stored in the dictionary as fields. Primary key attribute,
    * and it's value must be present when calling this method.
+   *
    * @param instance
    * @param tableName
    * @param values
    * @param options
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async insert(instance: Model | null, tableName: TableName, values: Record<string, any>, options?: QiInsertOptions):
     Promise<object> {
 
@@ -91,7 +94,6 @@ export class MomentoQueryInterfaceTypescript extends AbstractQueryInterface {
     return {};
   }
 
-
   async tableExists(tableNameOrModel: TableNameOrModel,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     options?: QueryRawOptions): Promise<boolean> {
@@ -107,6 +109,7 @@ export class MomentoQueryInterfaceTypescript extends AbstractQueryInterface {
    * At the time of writing, Momento's `select` only returns a single `row` as an object where each row is
    * a dictionary item fetched from Momento's cache. Primary key attribute and it's value must be present when
    * calling this method.
+   *
    * @param model
    * @param tableName
    * @param options
@@ -220,6 +223,7 @@ export class MomentoQueryInterfaceTypescript extends AbstractQueryInterface {
     }
 
     // Make sure the key in identifier matches the primary key of the model
+    // eslint-disable-next-line no-prototype-builtins
     if (!identifier.hasOwnProperty(primaryKey)) {
       throw new Error(`The identifier key must match the primary key of the model ${primaryKey} in Momento`);
     }
@@ -289,6 +293,7 @@ export class MomentoQueryInterfaceTypescript extends AbstractQueryInterface {
     const conn = await this.sequelize.connectionManager.getConnection() as MomentoConnection;
 
     for (const table of tables) {
+      // eslint-disable-next-line no-await-in-loop
       const response = await conn.cacheClient.deleteCache(table.tableName);
       if (response instanceof DeleteCache.Error && response.errorCode() !== MomentoErrorCode.NOT_FOUND_ERROR) {
         throw new Error(`An exception occured while deleting cache: ${response.message()}`);
@@ -306,7 +311,7 @@ export class MomentoQueryInterfaceTypescript extends AbstractQueryInterface {
 
     const response = await conn.cacheClient.deleteCache(tableNameObject.tableName);
 
-    if (response instanceof DeleteCache.Error  && response.errorCode() !== MomentoErrorCode.NOT_FOUND_ERROR) {
+    if (response instanceof DeleteCache.Error && response.errorCode() !== MomentoErrorCode.NOT_FOUND_ERROR) {
       throw new Error(`An exception occured while deleting cache: ${response.message()}`);
     }
   }
