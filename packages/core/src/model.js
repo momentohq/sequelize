@@ -3758,6 +3758,7 @@ Instead of specifying a Model, either:
 
     if (this.sequelize.options.dialect === 'momento') {
       await this.constructor.queryInterface[query](...args);
+
       return this;
     }
 

@@ -1,4 +1,5 @@
 'use strict';
+
 const Support = require('../../support');
 
 const chai = require('chai');
@@ -9,7 +10,7 @@ const { DataTypes } = require('@sequelize/core');
 const { setResetMode } = require('../../support');
 
 if (dialect === 'momento') {
-  describe('[Momento Specific] Smoke test', () =>{
+  describe('[Momento Specific] Smoke test', () => {
     describe('[Momento Specific] Basic test for one table', () => {
       setResetMode('none');
 
@@ -147,11 +148,11 @@ if (dialect === 'momento') {
                 id: 1,
               },
           });
-          expect.fail('Error should have been thrown from the test as the select operation where clause doesn\'t provide ' +
-            'the primary key');
+          expect.fail('Error should have been thrown from the test as the select operation where clause doesn\'t provide '
+            + 'the primary key');
         } catch (error) {
-          expect(error.message).to.contains('Momento only supports 1 attribute in the where clause which has to be ' +
-            'the primary key.');
+          expect(error.message).to.contains('Momento only supports 1 attribute in the where clause which has to be '
+            + 'the primary key.');
         }
       });
 
@@ -175,8 +176,8 @@ if (dialect === 'momento') {
                 id: 1,
               },
           });
-          expect.fail('Error should have been thrown from the test as the select operation where clause doesn\'t provide ' +
-            'the primary key');
+          expect.fail('Error should have been thrown from the test as the select operation where clause doesn\'t provide '
+            + 'the primary key');
         } catch (error) {
           expect(error.message).to.contains('The identifier key must match the primary key of the model');
         }
@@ -197,8 +198,8 @@ if (dialect === 'momento') {
           });
           expect.fail('Error should have been thrown from the test as the select operation provides more than 1 where clause');
         } catch (error) {
-          expect(error.message).to.contains('Momento only supports 1 attribute in the where clause which has to be ' +
-            'the primary key.');
+          expect(error.message).to.contains('Momento only supports 1 attribute in the where clause which has to be '
+            + 'the primary key.');
         }
       });
 
@@ -223,8 +224,8 @@ if (dialect === 'momento') {
                 username: 'alexa',
               },
           });
-          expect.fail('Error should have been thrown from the test as the select operation where clause doesn\'t provide ' +
-            'the primary key');
+          expect.fail('Error should have been thrown from the test as the select operation where clause doesn\'t provide '
+            + 'the primary key');
         } catch (error) {
           expect(error.message).to.equal('Momento supports a where clause with exactly one key');
         }
