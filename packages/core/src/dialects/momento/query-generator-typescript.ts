@@ -1,10 +1,6 @@
 import type { Expression } from '../../sequelize.js';
 import { AbstractQueryGenerator } from '../abstract/query-generator';
-import type {
-  EscapeOptions,
-  RemoveIndexQueryOptions,
-  TableNameOrModel,
-} from '../abstract/query-generator-typescript';
+import type { EscapeOptions, RemoveIndexQueryOptions, TableNameOrModel } from '../abstract/query-generator-typescript';
 import type { ShowConstraintsQueryOptions } from '../abstract/query-generator.types.js';
 
 /**
