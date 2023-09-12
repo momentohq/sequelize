@@ -23,8 +23,6 @@ export class SqliteQueryInterface extends SqliteQueryInterfaceTypeScript {
    * @override
    */
   async removeColumn(tableName, attributeName, options) {
-    options = options || {};
-
     const fields = await this.describeTable(tableName, options);
     delete fields[attributeName];
 
@@ -74,19 +72,6 @@ export class SqliteQueryInterface extends SqliteQueryInterfaceTypeScript {
     for (const subQuery of subQueries) {
       await this.sequelize.queryRaw(`${subQuery};`, { raw: true, ...options });
     }
-  }
-
-  /**
-   * @override
-   */
-  async dropAllTables(options) {
-    options = options || {};
-    const skip = options.skip || [];
-
-    const tableNames = await this.showAllTables(options);
-    await this.sequelize.queryRaw('PRAGMA foreign_keys = OFF', options);
-    await this._dropAllTables(tableNames, skip, options);
-    await this.sequelize.queryRaw('PRAGMA foreign_keys = ON', options);
   }
 
   /**

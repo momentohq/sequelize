@@ -224,7 +224,7 @@ if (dialect.startsWith('postgres')) {
         }, {
           title: 'string in array should escape \' as \'\'',
           arguments: ['myTable', { where: { aliases: { [Op.contains]: ['Queen\'s'] } } }],
-          expectation: 'SELECT * FROM "myTable" WHERE "myTable"."aliases" @> ARRAY[\'Queen\'\'s\'];',
+          expectation: 'SELECT * FROM "myTable" WHERE "myTable"."aliases" @> ARRAY[\'Queen\'\'s\']::VARCHAR(255)[];',
         },
 
         // Variants when quoteIdentifiers is false
@@ -775,7 +775,7 @@ if (dialect.startsWith('postgres')) {
               ...test.context?.options,
             });
 
-            const queryGenerator = newSequelize.queryInterface.queryGenerator;
+            const queryGenerator = newSequelize.queryGenerator;
 
             if (test.needsSequelize) {
               if (typeof test.arguments[1] === 'function') {
@@ -831,34 +831,6 @@ if (dialect.startsWith('postgres')) {
           const convertedText = this.queryGenerator.fromArray(test.arguments);
           expect(convertedText).to.deep.equal(test.expectation);
         });
-      });
-    });
-
-    describe('With custom schema in Sequelize options', () => {
-      beforeEach(function () {
-        this.queryGenerator = new QueryGenerator({
-          sequelize: customSequelize,
-          dialect: customSequelize.dialect,
-        });
-      });
-
-      const customSchemaSuites = {
-        showTablesQuery: [
-          {
-            title: 'showTablesQuery defaults to the schema set in Sequelize options',
-            arguments: [],
-            expectation: `SELECT table_name FROM information_schema.tables WHERE table_schema = 'custom' AND table_type LIKE '%TABLE' AND table_name != 'spatial_ref_sys';`,
-          },
-        ],
-      };
-
-      each(customSchemaSuites, (customSchemaTests, customSchemaSuiteTitle) => {
-        for (const customSchemaTest of customSchemaTests) {
-          it(customSchemaTest.title, function () {
-            const convertedText = customSchemaTest.arguments ? this.queryGenerator[customSchemaSuiteTitle](...customSchemaTest.arguments) : this.queryGenerator[customSchemaSuiteTitle]();
-            expect(convertedText).to.equal(customSchemaTest.expectation);
-          });
-        }
       });
     });
   });

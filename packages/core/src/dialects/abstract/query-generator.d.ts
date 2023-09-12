@@ -88,25 +88,9 @@ export interface CreateTableQueryOptions {
    | { [indexName: string]: { fields: string[] } };
 }
 
-// keep DROP_TABLE_QUERY_SUPPORTABLE_OPTIONS updated when modifying this
-export interface DropTableQueryOptions {
-  cascade?: boolean;
-}
-
-// keep LIST_SCHEMAS_QUERY_SUPPORTABLE_OPTIONS updated when modifying this
-export interface ListSchemasQueryOptions {
-  /** List of schemas to exclude from output */
-  skip?: string[];
-}
-
 // keep ADD_COLUMN_QUERY_SUPPORTABLE_OPTIONS updated when modifying this
 export interface AddColumnQueryOptions {
   ifNotExists?: boolean;
-}
-
-// keep REMOVE_COLUMN_QUERY_SUPPORTABLE_OPTIONS updated when modifying this
-export interface RemoveColumnQueryOptions {
-  ifExists?: boolean;
 }
 
 /**
@@ -142,12 +126,6 @@ export class AbstractQueryGenerator extends AbstractQueryGeneratorTypeScript {
     options?: AddColumnQueryOptions,
   ): string;
 
-  removeColumnQuery(
-    table: TableNameOrModel,
-    attributeName: string,
-    options?: RemoveColumnQueryOptions,
-  ): string;
-
   updateQuery(
     tableName: TableName,
     attrValueHash: object,
@@ -178,13 +156,10 @@ export class AbstractQueryGenerator extends AbstractQueryGeneratorTypeScript {
     columns: { [columnName: string]: string },
     options?: CreateTableQueryOptions
   ): string;
-  dropTableQuery(tableName: TableNameOrModel, options?: DropTableQueryOptions): string;
   renameTableQuery(before: TableNameOrModel, after: TableNameOrModel): string;
 
   createSchemaQuery(schemaName: string, options?: CreateSchemaQueryOptions): string;
   dropSchemaQuery(schemaName: string): string | QueryWithBindParams;
-
-  listSchemasQuery(options?: ListSchemasQueryOptions): string;
 
   createDatabaseQuery(databaseName: string, options?: CreateDatabaseQueryOptions): string;
   dropDatabaseQuery(databaseName: string): string;

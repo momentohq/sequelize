@@ -1,8 +1,12 @@
 import type { Deferrable } from '../../deferrable';
 import type { QueryRawOptions } from '../../sequelize';
-import type { CreateSchemaQueryOptions, ListSchemasQueryOptions } from './query-generator';
+import type { CreateSchemaQueryOptions } from './query-generator';
 import type {
   AddConstraintQueryOptions,
+  DropTableQueryOptions,
+  ListSchemasQueryOptions,
+  ListTablesQueryOptions,
+  RemoveColumnQueryOptions,
   RemoveConstraintQueryOptions,
   ShowConstraintsQueryOptions,
 } from './query-generator.types';
@@ -71,6 +75,9 @@ export interface QiDropAllSchemasOptions extends QueryRawOptions {
   skip?: string[];
 }
 
+/** Options accepted by {@link AbstractQueryInterface#showAllTables} */
+export interface QiShowAllTablesOptions extends ListTablesQueryOptions, QueryRawOptions { }
+
 /** Options accepted by {@link AbstractQueryInterface#describeTable} */
 export interface DescribeTableOptions extends QueryRawOptions {
   /**
@@ -83,7 +90,18 @@ export interface DescribeTableOptions extends QueryRawOptions {
   schemaDelimiter?: string;
 }
 
+/** Options accepted by {@link AbstractQueryInterface#dropTable} */
+export interface QiDropTableOptions extends DropTableQueryOptions, QueryRawOptions { }
+
+/** Options accepted by {@link AbstractQueryInterface#dropAllTables} */
+export interface QiDropAllTablesOptions extends QiDropTableOptions {
+  skip?: string[];
+}
+
 export interface FetchDatabaseVersionOptions extends Omit<QueryRawOptions, 'type' | 'plain'> {}
+
+/** Options accepted by {@link AbstractQueryInterface#removeColumn} */
+export interface RemoveColumnOptions extends RemoveColumnQueryOptions, QueryRawOptions { }
 
 /** Options accepted by {@link AbstractQueryInterface#addConstraint} */
 export type AddConstraintOptions = AddConstraintQueryOptions & QueryRawOptions;
