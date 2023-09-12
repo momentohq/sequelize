@@ -17,15 +17,14 @@ import type {
   QiOptionsWithReplacements,
   QiSelectOptions,
   QueryInterfaceCreateTableOptions,
-  QueryInterfaceDropAllTablesOptions,
-  QueryInterfaceDropTableOptions,
-  TableName,
+  TableName, TableNameWithSchema,
 } from '../abstract/query-interface.js';
 import { AbstractQueryInterface } from '../abstract/query-interface.js';
 import type { MomentoConnection } from './connection-manager';
 import type { MomentoQueryGenerator } from './query-generator.js';
 import { TableNameOrModel } from '../abstract/query-generator-typescript';
 import { WhereOptions } from '../abstract/where-sql-builder-types';
+import {QiDropAllTablesOptions, QiDropTableOptions, QiShowAllTablesOptions} from "../abstract/query-interface.types";
 
 export class MomentoQueryInterfaceTypescript extends AbstractQueryInterface {
   #internalQueryInterface: AbstractQueryInterfaceInternal;
@@ -271,26 +270,26 @@ export class MomentoQueryInterfaceTypescript extends AbstractQueryInterface {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async showAllTables(options?: QueryRawOptions) {
-    const caches: string[] = [];
+  async showAllTables(options?: QiShowAllTablesOptions) {
+    const caches: TableNameWithSchema[] = [];
     const conn = await this.sequelize.connectionManager.getConnection() as MomentoConnection;
 
     const listCaches = await conn.cacheClient.listCaches();
     if (listCaches instanceof ListCaches.Success) {
       for (const cache of listCaches.getCaches()) {
-        caches.push(cache.getName());
+        caches.push({ tableName: cache.getName() });
       }
     }
 
     return caches;
   }
 
-  async dropAllTables(options?: QueryInterfaceDropAllTablesOptions) {
-    const cacheNames = await this.showAllTables(options);
+  async dropAllTables(options?: QiDropAllTablesOptions) {
+    const tables = await this.showAllTables(options);
     const conn = await this.sequelize.connectionManager.getConnection() as MomentoConnection;
 
-    for (const cacheName of cacheNames) {
-      const response = await conn.cacheClient.deleteCache(cacheName);
+    for (const table of tables) {
+      const response = await conn.cacheClient.deleteCache(table.tableName);
       if (response instanceof DeleteCache.Error && response.errorCode() !== MomentoErrorCode.NOT_FOUND_ERROR) {
         throw new Error(`An exception occured while deleting cache: ${response.message()}`);
       }
@@ -299,7 +298,7 @@ export class MomentoQueryInterfaceTypescript extends AbstractQueryInterface {
 
   async dropTable(tableNameOrModel: TableName,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    options?: QueryInterfaceDropTableOptions) {
+    options?: QiDropTableOptions) {
     const tableNameObject = isModelStatic(tableNameOrModel) ? tableNameOrModel.getTableName()
       : isString(tableNameOrModel) ? { tableName: tableNameOrModel }
         : tableNameOrModel;

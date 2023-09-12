@@ -1,16 +1,11 @@
 import type { Expression } from '../../sequelize.js';
-import {AbstractQueryGenerator, CreateTableQueryOptions, DropTableQueryOptions} from '../abstract/query-generator';
+import { AbstractQueryGenerator } from '../abstract/query-generator';
 import type {
   EscapeOptions,
   RemoveIndexQueryOptions,
   TableNameOrModel,
 } from '../abstract/query-generator-typescript';
 import type { ShowConstraintsQueryOptions } from '../abstract/query-generator.types.js';
-import {MomentoConnection} from "./connection-manager";
-import {CreateCache, DeleteCache} from "@gomomento/sdk";
-import {isModelStatic} from "../../utils/model-utils";
-import {isString} from "../../utils/check";
-import {EMPTY_OBJECT} from "../../utils/object";
 
 /**
  * Temporary class to ease the TypeScript migration
