@@ -122,7 +122,7 @@ if (dialect === 'momento') {
           });
           expect.fail('Error should have been thrown from the test as the create doesn\'t provide the primary key column');
         } catch (error) {
-          expect(error.message).to.equal('Primary key value must be set for a Momento cache Model.');
+          expect(error.message).to.equal('Primary key value must be set for a Momento cache Model. "primaryKey" username');
         }
 
         // now specify PK in create but as null
@@ -132,7 +132,7 @@ if (dialect === 'momento') {
           });
           expect.fail('Error should have been thrown from the test as the create doesn\'t provide the primary key column');
         } catch (error) {
-          expect(error.message).to.equal('Primary key value must be set for a Momento cache Model.');
+          expect(error.message).to.equal('Primary key value must be set for a Momento cache Model. "primaryKey" username');
         }
       });
 
@@ -233,7 +233,7 @@ if (dialect === 'momento') {
 
       it('tableExists returns true for an existing cache and false for non-existent', async () => {
         expect(await sequelize.getQueryInterface().tableExists('MomentoUsers')).to.equal(true);
-        expect(await sequelize.getQueryInterface().tableExists('MomentoUser')).to.equal(false);
+        expect(await sequelize.getQueryInterface().tableExists('NoTable')).to.equal(false);
       });
 
     });

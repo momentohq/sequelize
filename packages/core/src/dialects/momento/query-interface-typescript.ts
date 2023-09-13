@@ -22,7 +22,7 @@ import type {
   TableNameWithSchema,
 } from '../abstract/query-interface.js';
 import { AbstractQueryInterface } from '../abstract/query-interface.js';
-import type { QiDropAllTablesOptions, QiDropTableOptions, QiShowAllTablesOptions } from '../abstract/query-interface.types';
+import type { QiDropTableOptions, QiShowAllTablesOptions } from '../abstract/query-interface.types';
 import type { WhereOptions } from '../abstract/where-sql-builder-types';
 import type { MomentoConnection } from './connection-manager';
 import type { MomentoQueryGenerator } from './query-generator.js';
@@ -68,7 +68,7 @@ export class MomentoQueryInterfaceTypescript extends AbstractQueryInterface {
     }
 
     if (values[primaryKey] === null || values[primaryKey] === undefined) {
-      throw new Error('Primary key value must be set for a Momento cache Model.');
+      throw new Error(`Primary key value must be set for a Momento cache Model. "primaryKey" ${primaryKey}`);
     }
 
     const dictionaryName = values[primaryKey].toString();
@@ -100,9 +100,16 @@ export class MomentoQueryInterfaceTypescript extends AbstractQueryInterface {
 
     const tableNameObject = this.getTableNameObject(tableNameOrModel);
     const mConn = await this.sequelize.connectionManager.getConnection() as MomentoConnection;
-    const response = await mConn.cacheClient.createCache(tableNameObject.tableName);
+    const listCaches = await mConn.cacheClient.listCaches();
+    if (listCaches instanceof ListCaches.Success) {
+      for (const cache of listCaches.getCaches()) {
+        if (cache.getName() === tableNameObject.tableName) {
+          return true;
+        }
+      }
+    }
 
-    return response instanceof CreateCache.AlreadyExists;
+    return false;
   }
 
   /**
@@ -286,19 +293,6 @@ export class MomentoQueryInterfaceTypescript extends AbstractQueryInterface {
     }
 
     return caches;
-  }
-
-  async dropAllTables(options?: QiDropAllTablesOptions) {
-    const tables = await this.showAllTables(options);
-    const conn = await this.sequelize.connectionManager.getConnection() as MomentoConnection;
-
-    for (const table of tables) {
-      // eslint-disable-next-line no-await-in-loop
-      const response = await conn.cacheClient.deleteCache(table.tableName);
-      if (response instanceof DeleteCache.Error && response.errorCode() !== MomentoErrorCode.NOT_FOUND_ERROR) {
-        throw new Error(`An exception occured while deleting cache: ${response.message()}`);
-      }
-    }
   }
 
   async dropTable(tableNameOrModel: TableName,
