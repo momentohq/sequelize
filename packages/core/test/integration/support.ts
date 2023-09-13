@@ -1,3 +1,4 @@
+
 import fs from 'node:fs';
 import path from 'node:path';
 import uniq from 'lodash/uniq';
@@ -223,7 +224,10 @@ The following methods can be used to mark a sequelize instance for automatic dis
 
 async function clearDatabaseInternal(customSequelize: Sequelize) {
   const qi = customSequelize.queryInterface;
-  await qi.dropAllTables();
+  if (getTestDialect() !== 'momento') {
+    await qi.dropAllTables();
+  }
+
   customSequelize.modelManager.models = [];
   customSequelize.models = {};
 
