@@ -6,7 +6,7 @@ import {
   ListCaches,
   MomentoErrorCode,
 } from '@gomomento/sdk';
-import type { CreationAttributes, Model, ModelStatic, NormalizedAttributeOptions } from '../../model';
+import type {Attributes, CreationAttributes, Model, ModelStatic, NormalizedAttributeOptions} from '../../model';
 import type { QueryRawOptions, Sequelize } from '../../sequelize.js';
 import { isString } from '../../utils/check';
 import { isModelStatic } from '../../utils/model-utils';
@@ -193,6 +193,67 @@ export class MomentoQueryInterfaceTypescript extends AbstractQueryInterface {
     // as we do not have a scan or query API, and we want the user to not unnecessarily iterate
     // over the users.
     return result;
+  }
+
+  async bulkUpdate<M extends Model>(
+    tableName: TableName,
+    values: Record<string, any>,
+    where: WhereOptions<Attributes<M>>,
+    options?: QiOptionsWithReplacements,
+    columnDefinitions?: { [columnName: string]: NormalizedAttributeOptions },
+  ): Promise<object> {
+
+    // Get the table name object
+    const tableNameObject = this.getTableNameObject(tableName);
+
+    // Get the connection
+    const conn = await this.sequelize.connectionManager.getConnection() as MomentoConnection;
+
+    // Determine primary key attribute from columnDefinitions
+    let primaryKey: string | null = null;
+
+    if (columnDefinitions) {
+      // eslint-disable-next-line no-restricted-syntax
+      for (const columnName in columnDefinitions) {
+        if (columnDefinitions[columnName].primaryKey === true) {
+          primaryKey = columnName;
+          break;
+        }
+      }
+    }
+
+    if (primaryKey === null) {
+      throw new Error('The Model for a Momento cache must have a primary key defined');
+    }
+
+    if ((where as any)[primaryKey] === null || (where as any)[primaryKey] === undefined) {
+      throw new Error(`Primary key value must be set for a Momento cache Model. "primaryKey" ${primaryKey}`);
+    }
+
+    // Prepare the dictionary fields
+    const dictionaryName = (where as any)[primaryKey].toString();
+    const dictionaryFields: Map<string | Uint8Array, string | Uint8Array> = new Map();
+
+    // Serialize the attributes
+    for (const key of Object.keys(values)) {
+      const attr = columnDefinitions ? columnDefinitions[key] : undefined;
+      if (attr !== undefined) {
+        const serializedVal = this.serializeAttribute(key, attr, values[key]);
+        if (serializedVal !== undefined) {
+          dictionaryFields.set(key, serializedVal);
+        }
+      }
+    }
+
+    // Update the fields in the dictionary
+    const response = await conn.cacheClient.dictionarySetFields(tableNameObject.tableName,
+      dictionaryName, dictionaryFields);
+
+    if (response instanceof CacheDictionarySetFields.Error) {
+      throw response.innerException();
+    }
+
+    return {};
   }
 
   /**

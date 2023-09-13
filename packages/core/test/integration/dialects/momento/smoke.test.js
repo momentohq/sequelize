@@ -40,7 +40,7 @@ if (dialect === 'momento') {
         await MomentoUser.drop();
       });
 
-      it('insert, select, delete success all fields present', async () => {
+      it('insert, select, update, delete success all fields present', async () => {
         await MomentoUser.create({
           id: 1, username: 'taylor', adult: true, lastActivity: new Date(Date.UTC(2021, 5, 21)),
           accountBalance: 70.07,
@@ -57,6 +57,24 @@ if (dialect === 'momento') {
         user.lastActivity.toISOString().should.equal(new Date(Date.UTC(2021, 5, 21)).toISOString());
         user.adult.should.equal(true);
         user.accountBalance.should.equal(70.07);
+
+        await MomentoUser.update({ accountBalance: 70.05, lastActivity: new Date(Date.UTC(2021, 5, 21, 2)) }, {
+          where: {
+            username: 'taylor',
+          },
+        });
+        user = await MomentoUser.findOne({
+          where:
+            {
+              username: 'taylor',
+            },
+        });
+        user.accountBalance.should.equal(70.05);
+        // rest properties remain same
+        user.id.should.equal(1);
+        user.username.should.equal('taylor');
+        user.lastActivity.toISOString().should.equal(new Date(Date.UTC(2021, 5, 21, 2)).toISOString());
+        user.adult.should.equal(true);
         await MomentoUser.destroy({
           where: {
             username: 'taylor',
@@ -154,6 +172,46 @@ if (dialect === 'momento') {
           expect(error.message).to.contains('Momento only supports 1 attribute in the where clause which has to be '
             + 'the primary key.');
         }
+      });
+
+      it('update without a primary key throws error', async () => {
+        await MomentoUser.create({
+          id: 1, username: 'taylor', adult: true, lastActivity: new Date(Date.UTC(2021, 5, 21)),
+          accountBalance: 70.07,
+        });
+
+        const user = await MomentoUser.findOne({
+          where:
+            {
+              username: 'taylor',
+            },
+        });
+        user.id.should.equal(1);
+        user.username.should.equal('taylor');
+        user.lastActivity.toISOString().should.equal(new Date(Date.UTC(2021, 5, 21)).toISOString());
+        user.adult.should.equal(true);
+        user.accountBalance.should.equal(70.07);
+
+        try {
+          await MomentoUser.update({
+            accountBalance: 70.05,
+            lastActivity: new Date(Date.UTC(2021, 5, 21, 2))
+          }, {
+            where: {
+              id: 1,
+            },
+          });
+          expect.fail('Error should have been thrown from the test as the update operation where clause doesn\'t provide '
+            + 'the primary key');
+        } catch (error) {
+          expect(error.message).to.equal('Primary key value must be set for a Momento cache Model. "primaryKey" username');
+        }
+
+        await MomentoUser.destroy({
+          where: {
+            username: 'taylor',
+          },
+        });
       });
 
       it('delete without a primary key where clause throws error', async () => {
