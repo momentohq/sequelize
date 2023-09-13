@@ -227,6 +227,7 @@ async function clearDatabaseInternal(customSequelize: Sequelize) {
   if (getTestDialect() !== 'momento') {
     await qi.dropAllTables();
   }
+
   customSequelize.modelManager.models = [];
   customSequelize.models = {};
 
