@@ -11,11 +11,12 @@ This directory contains a basic example to use sequelize with momento as a diale
 ### Pre-requisites
 
 - Node version 12 or greater is required
+- You will need a Momento Auth Token to run the example. You can get one from our [console](https://console.gomomento.com/)
 
 ### Running the examples
 
 ```bash
 cd examples/momento
 npm install
-npm run basic
+MOMENTO_AUTH_TOKEN="<your-auth-token>" npm run basic
 ```
